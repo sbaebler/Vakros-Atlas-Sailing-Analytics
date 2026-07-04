@@ -63,4 +63,8 @@ Local backend needs a MariaDB/MySQL DB `vakaros` (`api/db/migrations.sql`), a `.
   depends on the estimated/manual TWD/TWS. Treat wind accuracy as tunable, not exact.
 - Maneuver/leg detection thresholds live in `DEFAULTS` in `analysis/maneuvers.ts`; tune there.
 - On Cyon the deployed web root is `public/` contents **plus** `api/`; `.env` and `storage/`
-  must sit **outside** the web root (the `.env` loader searches parent dirs).
+  must sit **outside** the web root (the `.env` loader in `api/lib/db.php` checks 1 and 2
+  levels above the web root). Note: if the subdomain's web root is itself a subfolder of
+  the main domain's `public_html` (e.g. `public_html/vakaros/`), one level up is still
+  `public_html` — the main domain's own web root — so `.env`/`storage/` must go two levels
+  up (the account home directory) instead.

@@ -85,8 +85,12 @@ Danach auf dem Server:
 
 1. Inhalt von `deploy/` in den Webroot der Subdomain hochladen
    (enthält `index.html`, `assets/`, `.htaccess`, `api/`).
-2. `.env` **eine Ebene über** dem Webroot anlegen (DB-Zugang aus dem Cyon-Panel) und ein
-   beschreibbares `storage/`-Verzeichnis **außerhalb** des Webroots (`STORAGE_DIR`).
+2. `.env` anlegen (DB-Zugang aus dem Cyon-Panel) und ein beschreibbares `storage/`-
+   Verzeichnis für `STORAGE_DIR` — beide **außerhalb jedes Webroots**. Achtung: Wenn die
+   Subdomain als Unterordner der Hauptdomain liegt (z. B. Webroot `public_html/vakaros/`),
+   ist "eine Ebene darüber" (`public_html/`) selbst noch der Webroot der Hauptdomain und
+   damit öffentlich erreichbar! In dem Fall gehört `.env` ins Home-Verzeichnis des Accounts
+   (zwei Ebenen über dem Subdomain-Webroot, `api/lib/db.php` prüft auch diesen Pfad).
 3. Datenbank im Panel anlegen, `api/db/migrations.sql` importieren (phpMyAdmin oder SSH).
 4. PHP-Version im Panel auf 8.x setzen; Let's-Encrypt-HTTPS aktivieren.
 5. Login anlegen: `php api/bin/create-user.php <email> <passwort>` (per SSH).
