@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { api } from '../api/client';
+import { api, Boat } from '../api/client';
 import { Sample } from '../parse/types';
 import { analyze, Analysis } from '../analysis/analyze';
 import { Polar } from '../analysis/polar';
@@ -20,6 +20,8 @@ export function SessionView() {
   const [meta, setMeta] = useState<any>(null);
   const [samples, setSamples] = useState<Sample[] | null>(null);
   const [polar, setPolar] = useState<Polar | null>(null);
+  const [boats, setBoats] = useState<Boat[]>([]);
+  const [boatBusy, setBoatBusy] = useState(false);
   const [error, setError] = useState('');
   const [sel, setSel] = useState<{ range: Range; label: string } | null>(null);
   const [cursorIdx, setCursorIdx] = useState<number | null>(null);
@@ -34,11 +36,37 @@ export function SessionView() {
           setPolar(ps[0]?.data ?? null);
         }
         setSamples(await api.getSessionTrack(sid));
+        setBoats(await api.listBoats());
       } catch (e: any) {
         setError(e.message);
       }
     })();
   }, [sid]);
+
+  async function assignBoat(boatIdRaw: string) {
+    const boatId = boatIdRaw === '' ? null : Number(boatIdRaw);
+    setBoatBusy(true);
+    try {
+      await api.updateSession(sid, { boat_id: boatId });
+      const boat = boats.find((b) => b.id === boatId);
+      setMeta((m: any) => ({
+        ...m,
+        boat_id: boatId,
+        boat_name: boat?.name ?? null,
+        boat_class: boat?.boat_class ?? null,
+      }));
+      if (boatId) {
+        const ps = await api.listPolars(boatId);
+        setPolar(ps[0]?.data ?? null);
+      } else {
+        setPolar(null);
+      }
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setBoatBusy(false);
+    }
+  }
 
   const analysis: Analysis | null = useMemo(() => {
     if (!samples) return null;
@@ -81,8 +109,22 @@ export function SessionView() {
       <div className="row between wrap">
         <div>
           <h1 style={{ marginBottom: 2 }}>{meta.name}</h1>
+          <div className="row" style={{ gap: 6, alignItems: 'center', marginBottom: 2 }}>
+            <span className="muted">Boot</span>
+            <select
+              value={meta.boat_id ?? ''}
+              disabled={boatBusy}
+              onChange={(e) => assignBoat(e.target.value)}
+            >
+              <option value="">– kein Boot –</option>
+              {boats.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name} {b.boat_class ? `(${b.boat_class})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="muted">
-            {meta.boat_name ? `${meta.boat_name} · ${meta.boat_class || '–'} · ` : ''}
             {clock(samples[0].t)}–{clock(samples[samples.length - 1].t)} ·{' '}
             Wind {deg(st.twd)} / {st.tws.toFixed(0)} kt ({st.windSource})
           </div>
