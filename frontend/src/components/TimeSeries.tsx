@@ -24,32 +24,40 @@ export function TimeSeries({ samples, onCursor, focus }: Props) {
 
     const data: uPlot.AlignedData = [xs, sog, vmg, heel];
 
+    // Series colors are palette-validated against the panel surface #16293a
+    // (CVD ΔE 32.1, all ≥3:1) — see styles.css --series-* tokens.
+    const GRID = 'rgba(148, 186, 220, 0.10)';
+    const TICK = 'rgba(148, 186, 220, 0.22)';
+    const INK = '#8fa6ba';
     const opts: uPlot.Options = {
       width: elRef.current.clientWidth,
-      height: 260,
-      cursor: { drag: { x: true, y: false } },
+      height: 270,
+      cursor: {
+        drag: { x: true, y: false },
+        points: { size: 7, width: 2, fill: '#16293a' },
+      },
       scales: { x: { time: false }, kt: {}, heel: {} },
       axes: [
-        { stroke: '#93a7b8', grid: { stroke: '#274156' }, ticks: { stroke: '#274156' } },
+        { stroke: INK, grid: { stroke: GRID }, ticks: { stroke: TICK } },
         {
           scale: 'kt',
-          stroke: '#93a7b8',
-          grid: { stroke: '#1d3346' },
-          ticks: { stroke: '#274156' },
+          stroke: INK,
+          grid: { stroke: GRID },
+          ticks: { stroke: TICK },
         },
         {
           side: 1,
           scale: 'heel',
-          stroke: '#93a7b8',
+          stroke: INK,
           grid: { show: false },
-          ticks: { stroke: '#274156' },
+          ticks: { stroke: TICK },
         },
       ],
       series: [
         { label: 't (s)' },
-        { label: 'SOG', stroke: '#37c0e6', width: 1.5, scale: 'kt' },
-        { label: 'VMG', stroke: '#4ad991', width: 1.5, scale: 'kt' },
-        { label: 'Heel', stroke: '#f2b24b', width: 1, scale: 'heel' },
+        { label: 'SOG', stroke: '#1f9fc7', width: 2, scale: 'kt' },
+        { label: 'VMG', stroke: '#29ad70', width: 2, scale: 'kt' },
+        { label: 'Heel', stroke: '#bf8120', width: 1.5, scale: 'heel' },
       ],
       hooks: {
         setCursor: [
@@ -63,7 +71,7 @@ export function TimeSeries({ samples, onCursor, focus }: Props) {
 
     const plot = new uPlot(opts, data, elRef.current);
     plotRef.current = plot;
-    const onResize = () => plot.setSize({ width: elRef.current!.clientWidth, height: 260 });
+    const onResize = () => plot.setSize({ width: elRef.current!.clientWidth, height: 270 });
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);

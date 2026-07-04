@@ -28,8 +28,8 @@ export function Dashboard() {
         </div>
       )}
       {sessions && sessions.length > 0 && (
-        <div className="panel" style={{ padding: 0 }}>
-          <table>
+        <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
+          <table className="tbl-sessions">
             <thead>
               <tr>
                 <th>Datum</th>

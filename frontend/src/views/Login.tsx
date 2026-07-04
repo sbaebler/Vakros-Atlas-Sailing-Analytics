@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useAuth } from '../auth';
+import { CompassRose, Logo } from '../components/Logo';
 
 export function Login() {
   const { login } = useAuth();
@@ -23,11 +24,15 @@ export function Login() {
 
   return (
     <div className="login-wrap">
+      <div className="login-rose" style={{ color: 'var(--accent)' }}>
+        <CompassRose />
+      </div>
       <form className="panel login" onSubmit={submit}>
-        <div className="brand" style={{ fontSize: 20, marginBottom: 6 }}>
-          Atlas <span style={{ color: 'var(--accent)' }}>Analytics</span>
+        <div className="brand-lg">
+          <Logo size={26} />
+          Atlas&nbsp;<span>Analytics</span>
         </div>
-        <div className="muted">Segel-Performance-Analyse</div>
+        <div className="muted">Regatta-Analyse für den Vakaros Atlas 2</div>
         <label>E-Mail</label>
         <input
           type="email"
