@@ -69,7 +69,7 @@ im Repo unter **Settings → Secrets and variables → Actions** vier Secrets ge
 | `FTP_SERVER` | Cyon-FTP-Hostname (aus dem Cyon-Panel) |
 | `FTP_USERNAME` | Cyon-FTP-Benutzername |
 | `FTP_PASSWORD` | Cyon-FTP-Passwort |
-| `FTP_SERVER_DIR` | Webroot der Subdomain, mit `/` am Ende, z. B. `/home/tyingthe/public_html/vakaros/` |
+| `FTP_SERVER_DIR` | Webroot der Subdomain relativ zum FTP-Home, mit `/` am Ende, z. B. `public_html/vakaros/` |
 
 `.env` und `storage/` werden bewusst **nie** hochgeladen (liegen außerhalb des Webroots und
 stehen zusätzlich in der `exclude`-Liste). Die einmalige Server-Provisionierung (Schritte
