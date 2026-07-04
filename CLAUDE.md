@@ -29,7 +29,7 @@ php -S 127.0.0.1:8000 api/index.php
 ./scripts/package.sh
 ```
 
-Local backend needs a MariaDB/MySQL DB `vakaros` (`api/db/migrations.sql`), a `.env`
+Local backend needs a MariaDB/MySQL DB `vakaros` (`api/db/migrations.sql`), a `.env.vakaros`
 (see `.env.example`), and a user created via `php api/bin/create-user.php <email> <pw>`.
 
 ## Architecture (the parts that span files)
@@ -62,9 +62,11 @@ Local backend needs a MariaDB/MySQL DB `vakaros` (`api/db/migrations.sql`), a `.
 - The Atlas 2 records **no wind** without external instruments; polar comparison therefore
   depends on the estimated/manual TWD/TWS. Treat wind accuracy as tunable, not exact.
 - Maneuver/leg detection thresholds live in `DEFAULTS` in `analysis/maneuvers.ts`; tune there.
-- On Cyon the deployed web root is `public/` contents **plus** `api/`; `.env` and `storage/`
-  must sit **outside** the web root (the `.env` loader in `api/lib/db.php` checks 1 and 2
-  levels above the web root). Note: if the subdomain's web root is itself a subfolder of
-  the main domain's `public_html` (e.g. `public_html/vakaros/`), one level up is still
-  `public_html` — the main domain's own web root — so `.env`/`storage/` must go two levels
-  up (the account home directory) instead.
+- On Cyon the deployed web root is `public/` contents **plus** `api/`; `.env.vakaros` and
+  `storage/` must sit **outside** the web root (the loader in `api/lib/db.php` checks 1 and
+  2 levels above the web root). It's named `.env.vakaros` rather than `.env` so it doesn't
+  collide with other apps' env files sharing the same account home directory. Note: if the
+  subdomain's web root is itself a subfolder of the main domain's `public_html` (e.g.
+  `public_html/vakaros/`), one level up is still `public_html` — the main domain's own web
+  root — so `.env.vakaros`/`storage/` must go two levels up (the account home directory)
+  instead.

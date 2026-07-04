@@ -52,6 +52,7 @@ jobs:
           # Sicherheitsnetz: niemals Secrets/Runtime-Daten hochladen
           exclude: |
             **/.env
+            **/.env.vakaros
             **/.env.example
             **/.git*
             **/storage/**

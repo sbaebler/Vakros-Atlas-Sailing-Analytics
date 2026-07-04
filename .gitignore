@@ -10,6 +10,7 @@ deploy/
 
 # Secrets & runtime data
 .env
+.env.vakaros
 storage/
 
 # Local sample data (private, large binaries)
