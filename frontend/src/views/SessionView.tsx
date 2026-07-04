@@ -146,11 +146,11 @@ export function SessionView() {
         </div>
       </div>
 
-      <div className="panel" style={{ padding: 0 }}>
+      <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '12px 16px' }}>
           <h2 style={{ margin: 0 }}>Schläge</h2>
         </div>
-        <table>
+        <table className="tbl-legs">
           <thead>
             <tr>
               <th>#</th>
@@ -190,18 +190,33 @@ export function SessionView() {
                 <td>{kt(l.avgVmg)}</td>
                 <td>{deg(l.avgHeel)}</td>
                 <td>{l.headingStdDev.toFixed(1)}°</td>
-                <td>{pct(l.percentPolar)}</td>
+                <td>
+                  {l.percentPolar != null ? (
+                    <span className={`meter ${l.percentPolar >= 100 ? 'hot' : ''}`}>
+                      {pct(l.percentPolar)}
+                      <i>
+                        <b
+                          style={{
+                            width: `${Math.min(100, (l.percentPolar / 120) * 100)}%`,
+                          }}
+                        />
+                      </i>
+                    </span>
+                  ) : (
+                    '–'
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div className="panel" style={{ padding: 0 }}>
+      <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '12px 16px' }}>
           <h2 style={{ margin: 0 }}>Manöver</h2>
         </div>
-        <table>
+        <table className="tbl-maneuvers">
           <thead>
             <tr>
               <th>Zeit</th>

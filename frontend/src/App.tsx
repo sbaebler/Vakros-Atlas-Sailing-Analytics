@@ -1,5 +1,6 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth';
+import { Logo } from './components/Logo';
 import { Login } from './views/Login';
 import { Dashboard } from './views/Dashboard';
 import { Import } from './views/Import';
@@ -21,7 +22,8 @@ export function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          Atlas <span>Analytics</span>
+          <Logo />
+          Atlas&nbsp;<span>Analytics</span>
         </div>
         <nav>
           <NavLink to="/" end>
