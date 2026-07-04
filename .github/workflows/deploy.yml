@@ -40,7 +40,7 @@ jobs:
           cp -a api deploy/api
 
       - name: Deploy via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           protocol: ftps
           port: 21
@@ -57,3 +57,13 @@ jobs:
             **/.git*
             **/storage/**
             **/.DS_Store
+
+      - name: Force-sync .htaccess
+        # FTP-Deploy-Action's diff engine has a bug where dotfiles like .htaccess
+        # never show up as upload/replace/same candidates, so they're silently never
+        # (re-)synced. Push it directly via curl every time as a safety net.
+        run: |
+          curl --silent --show-error --ftp-ssl \
+            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
+            -T deploy/.htaccess \
+            "ftp://${{ secrets.FTP_SERVER }}/${{ secrets.FTP_SERVER_DIR }}.htaccess"
