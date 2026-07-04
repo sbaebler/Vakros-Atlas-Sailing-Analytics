@@ -57,15 +57,3 @@ jobs:
             **/.git*
             **/storage/**
             **/.DS_Store
-
-      - name: Force-sync .htaccess
-        # FTP-Deploy-Action's diff engine has a bug where dotfiles like .htaccess
-        # never show up as upload/replace/same candidates, so they're silently never
-        # (re-)synced. Push it directly via curl every time as a safety net.
-        run: |
-          echo "workspace: $GITHUB_WORKSPACE"
-          ls -la "$GITHUB_WORKSPACE/deploy/"
-          curl --silent --show-error --ftp-ssl \
-            --user "${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}" \
-            -T "$GITHUB_WORKSPACE/deploy/.htaccess" \
-            "ftp://${{ secrets.FTP_SERVER }}/${{ secrets.FTP_SERVER_DIR }}.htaccess"

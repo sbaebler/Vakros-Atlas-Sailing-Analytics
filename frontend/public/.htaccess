@@ -1,0 +1,36 @@
+# Cyon (LiteSpeed / Apache) config for the single-page app + PHP API.
+# The deployed web root contains: index.html, assets/, and api/ (the PHP API).
+# Keep .env and storage/ OUTSIDE this web root (one level up).
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "same-origin"
+</IfModule>
+
+# Never serve secrets or VCS metadata.
+<FilesMatch "(^\.env|\.env\.example$)">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 /\.git
+
+RewriteEngine On
+
+# Force HTTPS (Cyon terminates TLS; honour the forwarded proto).
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Block direct access to any track storage that might sit inside the web root.
+RewriteRule ^storage/ - [F]
+
+# Route the API to its front controller.
+RewriteRule ^api(/.*)?$ api/index.php [L,QSA]
+
+# SPA fallback: real files/dirs are served as-is, everything else -> index.html.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^ index.html [L]
