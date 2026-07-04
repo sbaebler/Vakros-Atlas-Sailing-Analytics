@@ -9,8 +9,17 @@ function env(string $key, ?string $default = null): ?string
     static $vars = null;
     if ($vars === null) {
         $vars = [];
-        $path = dirname(__DIR__, 2) . '/.env';
-        if (is_readable($path)) {
+        // Look for .env in the docroot (api/ is at docroot/api) and one level above it,
+        // so secrets can be kept outside the web root. An explicit path wins.
+        $candidates = array_filter([
+            getenv('APP_ENV_FILE') ?: null,
+            dirname(__DIR__, 2) . '/.env',
+            dirname(__DIR__, 3) . '/.env',
+        ]);
+        foreach ($candidates as $path) {
+            if (!is_readable($path)) {
+                continue;
+            }
             foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
                 $line = trim($line);
                 if ($line === '' || $line[0] === '#' || !str_contains($line, '=')) {
@@ -19,6 +28,7 @@ function env(string $key, ?string $default = null): ?string
                 [$k, $v] = explode('=', $line, 2);
                 $vars[trim($k)] = trim($v, " \t\"'");
             }
+            break;
         }
         // Real environment variables win over the file.
         $vars = array_merge($vars, array_filter(getenv() ?: []));
