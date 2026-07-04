@@ -57,6 +57,26 @@ php -S 127.0.0.1:8000 -t public scripts/dev-router.php   # aus dem Repo-Root
 
 Cyon = LiteSpeed + PHP 8.x + MariaDB 10.6, `.htaccess`-kompatibel, Git/SFTP + SSH.
 
+### Automatisch (GitHub Actions, FTPS)
+
+Der Workflow `.github/workflows/deploy.yml` baut das Frontend, lässt die Tests als Gate
+laufen und lädt `public/`-Inhalt + `api/` per **FTPS** in den Webroot der Subdomain. Er
+läuft bei jedem Push auf `main` sowie manuell (Actions-Tab → *Run workflow*). Dafür müssen
+im Repo unter **Settings → Secrets and variables → Actions** vier Secrets gesetzt sein:
+
+| Secret | Inhalt |
+|---|---|
+| `FTP_SERVER` | Cyon-FTP-Hostname (aus dem Cyon-Panel) |
+| `FTP_USERNAME` | Cyon-FTP-Benutzername |
+| `FTP_PASSWORD` | Cyon-FTP-Passwort |
+| `FTP_SERVER_DIR` | Webroot der Subdomain, mit `/` am Ende, z. B. `/home/tyingthe/public_html/vakaros/` |
+
+`.env` und `storage/` werden bewusst **nie** hochgeladen (liegen außerhalb des Webroots und
+stehen zusätzlich in der `exclude`-Liste). Die einmalige Server-Provisionierung (Schritte
+2–5 unten) bleibt manuell.
+
+### Manuell (Fallback)
+
 ```bash
 ./scripts/package.sh           # Build + Assemblierung nach ./deploy
 ```

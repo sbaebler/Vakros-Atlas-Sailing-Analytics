@@ -1,0 +1,58 @@
+name: Deploy to Cyon (FTPS)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cyon
+  cancel-in-progress: false # laufenden Upload nicht mittendrin abbrechen
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Test (Gate)
+        working-directory: frontend
+        run: npm test
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build # -> ../public (inkl. .htaccess), tsc -b prueft Typen
+
+      - name: Assemble deploy bundle
+        run: |
+          rm -rf deploy && mkdir -p deploy
+          cp -a public/. deploy/
+          cp -a api deploy/api
+
+      - name: Deploy via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          protocol: ftps
+          port: 21
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: ./deploy/
+          # Sicherheitsnetz: niemals Secrets/Runtime-Daten hochladen
+          exclude: |
+            **/.env
+            **/.env.example
+            **/.git*
+            **/storage/**
+            **/.DS_Store
