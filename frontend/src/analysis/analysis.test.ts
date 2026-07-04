@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { describe, it, expect } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { parseVkx } from '../parse/vkx';
@@ -13,22 +13,9 @@ import {
   polarTargetSpeed,
 } from './polar';
 
-describe('full analysis on the Bernoulli sample', () => {
-  let track: ReturnType<typeof loadSample>;
-  let a: ReturnType<typeof analyze>;
-
-  beforeAll(() => {
-    track = loadSample();
-    a = analyze(track, { polar: defaultKeelboatPolar(), wind: { tws: 12 } });
-  });
-
-  it('produces segments and detects maneuvers', () => {
-    // rest of test
-  });
-});
-
 const here = dirname(fileURLToPath(import.meta.url));
 const SAMPLE = resolve(here, '../../../01_Sample Data/Bernoulli  31.5.2026.vkx');
+const hasSample = existsSync(SAMPLE);
 
 function loadSample() {
   const buf = readFileSync(SAMPLE);
@@ -75,31 +62,35 @@ describe('instrument true wind', () => {
   });
 });
 
-describe('full analysis on the Bernoulli sample', () => {
-  const track = loadSample();
-  const a = analyze(track, { polar: defaultKeelboatPolar(), wind: { tws: 12 } });
+// The private sample recording isn't committed to the repo (see .gitignore), so this
+// suite only runs where it's present (e.g. locally), not in CI.
+if (hasSample) {
+  describe('full analysis on the Bernoulli sample', () => {
+    const track = loadSample();
+    const a = analyze(track, { polar: defaultKeelboatPolar(), wind: { tws: 12 } });
 
-  it('produces segments and detects maneuvers', () => {
-    expect(a.segmentation.segments.length).toBeGreaterThan(1);
-    expect(a.maneuvers.length).toBeGreaterThan(0);
+    it('produces segments and detects maneuvers', () => {
+      expect(a.segmentation.segments.length).toBeGreaterThan(1);
+      expect(a.maneuvers.length).toBeGreaterThan(0);
+    });
+    it('estimates a wind direction', () => {
+      expect(a.stats.windSource).toBe('estimated');
+      expect(a.stats.twd).toBeGreaterThanOrEqual(0);
+      expect(a.stats.twd).toBeLessThan(360);
+    });
+    it('classifies legs with polar percentages', () => {
+      const withPolar = a.legs.filter((l) => l.percentPolar != null);
+      expect(withPolar.length).toBe(a.legs.length);
+      // sanity: percentages are in a believable band on average
+      const avg =
+        withPolar.reduce((s, l) => s + (l.percentPolar ?? 0), 0) / withPolar.length;
+      expect(avg).toBeGreaterThan(20);
+      expect(avg).toBeLessThan(200);
+    });
+    it('summary stats are sane', () => {
+      expect(a.stats.durationSec).toBeGreaterThan(3000);
+      expect(a.stats.distanceNm).toBeGreaterThan(1);
+      expect(a.stats.maxSog).toBeGreaterThan(5);
+    });
   });
-  it('estimates a wind direction', () => {
-    expect(a.stats.windSource).toBe('estimated');
-    expect(a.stats.twd).toBeGreaterThanOrEqual(0);
-    expect(a.stats.twd).toBeLessThan(360);
-  });
-  it('classifies legs with polar percentages', () => {
-    const withPolar = a.legs.filter((l) => l.percentPolar != null);
-    expect(withPolar.length).toBe(a.legs.length);
-    // sanity: percentages are in a believable band on average
-    const avg =
-      withPolar.reduce((s, l) => s + (l.percentPolar ?? 0), 0) / withPolar.length;
-    expect(avg).toBeGreaterThan(20);
-    expect(avg).toBeLessThan(200);
-  });
-  it('summary stats are sane', () => {
-    expect(a.stats.durationSec).toBeGreaterThan(3000);
-    expect(a.stats.distanceNm).toBeGreaterThan(1);
-    expect(a.stats.maxSog).toBeGreaterThan(5);
-  });
-});
+}
