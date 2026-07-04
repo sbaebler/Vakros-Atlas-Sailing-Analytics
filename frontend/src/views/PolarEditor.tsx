@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import { defaultKeelboatPolar, Polar } from '../analysis/polar';
+import { parsePolarCsv } from '../analysis/polarCsv';
 import { PolarChart } from '../components/PolarChart';
 
 export function PolarEditor() {
@@ -12,9 +13,11 @@ export function PolarEditor() {
 
   const [name, setName] = useState('Polar');
   const [polar, setPolar] = useState<Polar>(defaultKeelboatPolar());
+  const [source, setSource] = useState('manual');
   const [previewTws, setPreviewTws] = useState(12);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isNew) return;
@@ -23,6 +26,7 @@ export function PolarEditor() {
       if (p) {
         setName(p.name);
         setPolar(p.data);
+        setSource(p.source || 'manual');
       }
     });
   }, [bId, polarId, isNew]);
@@ -43,11 +47,26 @@ export function PolarEditor() {
     setPolar({ ...polar, twaValues });
   }
 
+  async function importCsv(file: File) {
+    setError('');
+    try {
+      const text = await file.text();
+      const imported = parsePolarCsv(text, file.name.replace(/\.csv$/i, ''));
+      setPolar(imported);
+      setName(imported.name);
+      setSource(`csv:${file.name}`);
+    } catch (e: any) {
+      setError(`CSV-Import fehlgeschlagen: ${e.message}`);
+    } finally {
+      if (fileInput.current) fileInput.current.value = '';
+    }
+  }
+
   async function save() {
     setBusy(true);
     setError('');
     try {
-      const body = { name, source: 'manual', data: polar };
+      const body = { name, source, data: polar };
       if (isNew) await api.createPolar(bId, body);
       else await api.updatePolar(Number(polarId), body);
       nav('/boats');
@@ -76,6 +95,24 @@ export function PolarEditor() {
             <span className="muted">Name</span>
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </label>
+          <div className="row" style={{ gap: 8, marginBottom: 10, alignItems: 'center' }}>
+            <button type="button" onClick={() => fileInput.current?.click()}>
+              CSV importieren
+            </button>
+            <input
+              ref={fileInput}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) importCsv(file);
+              }}
+            />
+            <span className="muted" style={{ fontSize: 12 }}>
+              z.B. ORC-Polar-Export von windregatta.com (twa/tws;4;6;8...)
+            </span>
+          </div>
           <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
             Ziel-Bootsgeschwindigkeit (kt) je TWA (Zeile) × TWS (Spalte)
           </div>
