@@ -13,6 +13,20 @@ import {
   polarTargetSpeed,
 } from './polar';
 
+describe('full analysis on the Bernoulli sample', () => {
+  let track: ReturnType<typeof loadSample>;
+  let a: ReturnType<typeof analyze>;
+
+  beforeAll(() => {
+    track = loadSample();
+    a = analyze(track, { polar: defaultKeelboatPolar(), wind: { tws: 12 } });
+  });
+
+  it('produces segments and detects maneuvers', () => {
+    // rest of test
+  });
+});
+
 const here = dirname(fileURLToPath(import.meta.url));
 const SAMPLE = resolve(here, '../../../01_Sample Data/Bernoulli  31.5.2026.vkx');
 

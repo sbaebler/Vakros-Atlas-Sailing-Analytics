@@ -5,6 +5,18 @@ import { dirname, resolve } from 'node:path';
 import { parseVkx } from './vkx';
 import { parseCsv } from './csv';
 
+describe('VKX parser', () => {
+  let vkx: ReturnType<typeof loadVkx>;
+  
+  beforeAll(() => {
+    vkx = loadVkx();
+  });
+
+  it('parses PVO samples and metadata', () => {
+    // rest of test
+  });
+});
+
 const here = dirname(fileURLToPath(import.meta.url));
 const SAMPLE_DIR = resolve(here, '../../../01_Sample Data');
 const BASENAME = 'Bernoulli  31.5.2026';
