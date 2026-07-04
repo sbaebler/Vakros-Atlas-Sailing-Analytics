@@ -1,0 +1,1 @@
+{"root":["./src/analysis/analysis.test.ts","./src/analysis/analyze.ts","./src/analysis/geo.ts","./src/analysis/legs.ts","./src/analysis/maneuvers.ts","./src/analysis/polar.ts","./src/analysis/start.ts","./src/analysis/wind.ts","./src/parse/csv.ts","./src/parse/parse.test.ts","./src/parse/types.ts","./src/parse/vkx.ts"],"version":"5.9.3"}

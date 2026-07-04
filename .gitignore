@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+api/vendor/
+
+# Build output
+frontend/dist/
+public/assets/
+
+# Secrets & runtime data
+.env
+storage/
+
+# Local sample data (private, large binaries)
+01_Sample Data/
+
+# OS / editor
+.DS_Store
+*.log
+.vscode/
+.idea/
